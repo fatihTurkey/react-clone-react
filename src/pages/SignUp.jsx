@@ -65,6 +65,7 @@ function SignUp() {
                 id="name"
                 placeholder="Full Name"
                 //required={true}
+                autoComplete="on"
                 value={name}
                 onChange={onChange}
               />
@@ -77,6 +78,7 @@ function SignUp() {
                 id="email"
                 placeholder="Email Address"
                 // required={true}
+                autoComplete="on"
                 value={email}
                 onChange={onChange}
               />
@@ -89,6 +91,7 @@ function SignUp() {
                 id="password"
                 placeholder="Password"
                 // required={true}
+                autoComplete="on"
                 value={password}
                 onChange={onChange}
               />
