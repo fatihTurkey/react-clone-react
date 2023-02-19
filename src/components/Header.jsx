@@ -3,7 +3,6 @@ import { NavLink, useLocation } from "react-router-dom"
 
 function Header() {
   const location = useLocation()
-  console.log(location.pathname)
 
   const classNames = "block py-3 text-sm font-semibold text-gray-400 border-b-[3px] border-b-transparent"
   return (
@@ -15,17 +14,17 @@ function Header() {
         <nav>
           <ul className="flex space-x-10">
             <li>
-              <NavLink className={({ isActive }) => (isActive ? classNames + " text-black border-b-red-500" : classNames)} to="/">
+              <NavLink className={({ isActive }) => (isActive ? classNames + "text-black border-b-red-500" : classNames)} to="/">
                 Home
               </NavLink>
             </li>
             <li>
-              <NavLink className={({ isActive }) => (isActive ? classNames + " text-black border-b-red-500" : classNames)} to="/offers">
+              <NavLink className={({ isActive }) => (isActive ? classNames + "text-black border-b-red-500" : classNames)} to="/offers">
                 Offers
               </NavLink>
             </li>
             <li>
-              <NavLink className={({ isActive }) => (isActive ? classNames + " text-black border-b-red-500" : classNames)} to="/sign-in">
+              <NavLink className={({ isActive }) => (isActive ? classNames + "text-black border-b-red-500" : classNames)} to="/sign-in">
                 Sign in
               </NavLink>
             </li>

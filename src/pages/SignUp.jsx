@@ -1,16 +1,21 @@
 import React, { useEffect, useState } from "react"
 import { AiFillEyeInvisible, AiFillEye } from "react-icons/ai"
-import { Link } from "react-router-dom"
+import { Link, useNavigate } from "react-router-dom"
 import OAuth from "../components/OAuth"
+import { getAuth, createUserWithEmailAndPassword, updateProfile } from "firebase/auth"
+import { db } from "../firebase"
+import { serverTimestamp, setDoc, doc } from "firebase/firestore"
+import { toast } from "react-toastify"
 
 function SignUp() {
-  const [showpassword, setShowpassword] = useState(false)
+  const [showPassword, setShowPassword] = useState(false)
   const [formData, setFormData] = useState({
     name: "",
     email: "",
     password: "",
   })
   const { name, email, password } = formData
+  const navigate = useNavigate()
 
   function onChange(e) {
     setFormData((prev) => ({
@@ -18,6 +23,31 @@ function SignUp() {
       [e.target.id]: e.target.value,
     }))
   }
+  async function onSubmit(e) {
+    e.preventDefault()
+    try {
+      const auth = getAuth()
+      const userCredential = await createUserWithEmailAndPassword(auth, email, password)
+      updateProfile(auth.currentUser, {
+        displayName: name,
+      })
+      const user = userCredential.user
+      const formDataCopy = { ...formData }
+      delete formDataCopy.password
+      formDataCopy.timestamp = serverTimestamp()
+
+      await setDoc(doc(db, "users", user.uid), formDataCopy)
+
+      // Toast Success Message
+      toast.success("Your account was created successfully")
+      // Navigate To Home page
+      navigate("/")
+    } catch (error) {
+      // Toast Error Message
+      toast.error("Something went wrong with the registration")
+    }
+  }
+
   return (
     <section>
       <h1 className="text-3xl text-center mt-6 font-bold">Sign Up</h1>
@@ -26,31 +56,84 @@ function SignUp() {
           <img className="w-full rounded-2xl" src="https://images.unsplash.com/flagged/photo-1564767609342-620cb19b2357?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1073&q=80" alt="" />
         </div>
         <div className="w-full md:w-[67%] lg:w-[40%] lg:ml-20">
-          <form>
-            <input className="w-full my-2 px-4 py-2 text-xl text-gray-700 bg-white border-gray-300 rounded transition ease-in-out" id="name" type="text" value={name} onChange={onChange} placeholder="Name" />
-
-            <input className="w-full my-2 px-4 py-2 text-xl text-gray-700 bg-white border-gray-300 rounded transition ease-in-out" id="email" type="email" value={email} onChange={onChange} placeholder="Email Address" />
-
-            <div className="relative">
-              <input className="w-full px-4 my-2 py-2 text-xl text-gray-700 bg-white border-gray-300 rounded transition ease-in-out" id="password" type={showpassword ? "text" : "password"} value={password} onChange={onChange} placeholder="Password" />
-              {showpassword ? <AiFillEyeInvisible className="absolute right-3 top-3 text-xl cursor-pointer" onClick={() => setShowpassword((prev) => !prev)} /> : <AiFillEye className="absolute right-3 top-3 text-xl cursor-pointer" onClick={() => setShowpassword((prev) => !prev)} />}
+          <form onSubmit={onSubmit}>
+            <div className="mb-6">
+              <input
+                className="w-full px-4 py-2 text-xl text-gray-700 bg-white border-gray-300 rounded
+              transition ease-in-out"
+                type="text"
+                id="name"
+                placeholder="Full Name"
+                //required={true}
+                value={name}
+                onChange={onChange}
+              />
             </div>
-            <div className="flex justify-between">
-              <p>
-                Have an account? <Link to="/sign-in">Sign in</Link>
+            <div className="mb-6">
+              <input
+                className="w-full px-4 py-2 text-xl text-gray-700 bg-white border-gray-300 rounded
+              transition ease-in-out"
+                type="email"
+                id="email"
+                placeholder="Email Address"
+                // required={true}
+                value={email}
+                onChange={onChange}
+              />
+            </div>
+            <div className="relative mb-6">
+              <input
+                className="w-full px-4 py-2 text-xl text-gray-700 bg-white border-gray-300 rounded
+              transition ease-in-out"
+                type={showPassword ? "text" : "password"}
+                id="password"
+                placeholder="Password"
+                // required={true}
+                value={password}
+                onChange={onChange}
+              />
+              {showPassword ? <AiFillEyeInvisible onClick={() => setShowPassword((prev) => !prev)} className="absolute right-3 top-3 text-xl cursor-pointer" /> : <AiFillEye onClick={() => setShowPassword((prev) => !prev)} className="absolute right-3 top-3 text-xl cursor-pointer" />}
+            </div>
+            <div className="flex justify-between whitespace-nowrap text-sm sm:text-lg">
+              <p className="mb-6">
+                Have an account?
+                <Link
+                  to="/sign-in"
+                  className="text-red-600 hover:text-red-700
+                transition duration-200 ease-in-out ml-1"
+                >
+                  Sign In
+                </Link>
               </p>
-              <p>
-                <Link to="/forgot-password">Forgot Password</Link>
+              <p className="mb-6">
+                <Link
+                  to="/forgot-password"
+                  className="text-blue-600 hover:text-blue-800
+                transition duration-200 ease-in-out "
+                >
+                  Forgot Password?
+                </Link>
               </p>
             </div>
+            <button
+              className="w-full bg-blue-600 text-white px-7 py-3 text-sm 
+          font-medium uppercase rounded shadow-md
+        hover:bg-blue-700 transition duration-150 
+          ease-in-out hover:shadow-lg active:bg-blue-800"
+              type="submit"
+            >
+              Sign Up
+            </button>
+            <div
+              className="flex items-center my-4 
+          before:border-t  before:flex-1 before:border-gray-300
+          after:border-t  after:flex-1 after:border-gray-300"
+            >
+              <p className="text-center font-semibold mx-4">OR</p>
+            </div>
+
+            <OAuth />
           </form>
-          <button className="w-full bg-blue-600 my-3 text-white py-4 px-7 font-bold  uppercase" type="submit">
-            Sign up
-          </button>
-          <div className="my-4 before:border-t before:flex-1 flex">
-            <p className="text-center font-bold mx-4">OR</p>
-          </div>
-          <OAuth />
         </div>
       </div>
     </section>
